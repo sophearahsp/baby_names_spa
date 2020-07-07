@@ -7,22 +7,22 @@ export default class Main extends Component {
         this.state = {
             listID: props.listID,
             // TODO check database to see if there are names
-             names: [],
-            nameTextBox: '',
+            names: [],
+            nameInput: '',
             errorMessage: ''
         }
         this.handleSubmit = this.handleSubmit.bind(this);
-        this.handleNameTextBoxChange = this.handleNameTextBoxChange.bind(this);
+        this.handlenameInputChange = this.handlenameInputChange.bind(this);
     }
 
     handleSubmit = (event) => {
         event.preventDefault();
-        let newName = this.state.nameTextBox.trim() // removes whitespace
+        let newName = this.state.nameInput.trim() // removes whitespace
 
         if ((newName !== "") && //not blank
             (this.state.names.find(name => {return name === newName;}) !== newName) // not already in the list
         ){
-            this.setState({nameTextBox: ""})
+            this.setState({nameInput: ""})
             this.setState({errorMessage: ""});
             this.setState(oldState => {
                 return {
@@ -31,12 +31,12 @@ export default class Main extends Component {
             })
         }else{
             this.setState({errorMessage: "theres an error"});
-            this.setState({nameTextBox: ""})
+            this.setState({nameInput: ""})
         }
     }
     
-    handleNameTextBoxChange = (event) => {
-        this.setState({ nameTextBox: event.target.value});
+    handlenameInputChange = (event) => {
+        this.setState({ nameInput: event.target.value});
     }
 
     render() {
@@ -45,8 +45,8 @@ export default class Main extends Component {
                 <form onSubmit={this.handleSubmit}>
                     <input
                         type = "text"
-                        value = {this.state.nameTextBox}
-                        onChange = {this.handleNameTextBoxChange}
+                        value = {this.state.nameInput}
+                        onChange = {this.handlenameInputChange}
                     />
                     
                     <button type="submit">Submit</button>
