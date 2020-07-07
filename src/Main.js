@@ -7,9 +7,9 @@ export default class Main extends Component {
         this.state = {
             listID: props.listID,
             // TODO check database to see if there are names
-             names: ["somally", "darin", "sophearah"],
-            
-            nameTextBox: ''
+             names: [],
+            nameTextBox: '',
+            errorMessage: ''
         }
         this.handleSubmit = this.handleSubmit.bind(this);
         this.handleNameTextBoxChange = this.handleNameTextBoxChange.bind(this);
@@ -22,12 +22,15 @@ export default class Main extends Component {
         if ((newName !== "") && //not blank
             (this.state.names.find(name => {return name === newName;}) !== newName) // not already in the list
         ){
+            this.setState({nameTextBox: ""})
+            this.setState({errorMessage: ""});
             this.setState(oldState => {
                 return {
                     names: oldState.names.concat(newName)
                 };
             })
-            
+        }else{
+            this.setState({errorMessage: "theres an error"});
             this.setState({nameTextBox: ""})
         }
     }
@@ -47,6 +50,7 @@ export default class Main extends Component {
                     />
                     
                     <button type="submit">Submit</button>
+                    <label >{this.state.errorMessage}</label>
                 </form>
 
                 {// map names
