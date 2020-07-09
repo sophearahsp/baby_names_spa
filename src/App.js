@@ -2,48 +2,48 @@ import React, {Component} from 'react';
 import Main from "./Main"
 
 export default class App extends Component {
-  // generates new ID and changes URL
   generateNewID = () => {
     //TODO: generate ID on API
     let genID = Math.random().toString(36).slice(2);
     this.setState({listID: genID})
     window.history.pushState({},"","/?list_id=" + genID);
-    
   }
+
   constructor(props){
     super(props);
-
     this.state = {
-      listID: ""
+      listID: "",
+      names: [],
+      dbId: 0
     }
-
     const href = window.location.href;
     const protocol = window.location.protocol;
     const host = window.location.host;
-    
-    if (href.startsWith(protocol + "//" + host + "/?list_id=")){
-      // parse list_id
-      const queryString = window.location.search;
-      const urlParams = new URLSearchParams(queryString);
-      const urlListID = urlParams.get("list_id");
-      // check if the list_id provided by URL is valid
-      // TODO: make sure string is 12 characters
-      const exp = /^[a-zA-Z0-9]+$/g;
-      if (urlListID.match(exp)){
-        this.state.listID = urlListID
-      }else{// if invalid generate new id
-        this.generateNewID();
-      }
 
-    }else{// URL either "/" or incorrect format
-      this.generateNewID()
+    if ((href.startsWith(protocol + "//" + host + "/?list_id=")) && // if has something as id
+      (href.split('=')[1].match(/^[a-zA-Z0-9]{12}$/g)) && // if id is alphanumeric and 12 characters
+      (this.VerifyUrlIdentification(href.split('=')[1])) // it is verified to be in the database
+    ){
+      this.state.listID = href.split('=')[1];
+    }else{
+      this.generateNewID();
     }
+  }
+
+  async VerifyUrlIdentification(toVerify){
+    const API = 'http://localhost:3001/api/v1/url_identifications/';
+    const response = await fetch(API);
+    console.log(response)
+    const data = await response.json();
+    
+    if (data.find(datum => datum.identification === toVerify)){
+      return true
+    }else{return false}
   }
 
   render(){
     return(
       <div>
-        
         <Main listID={this.state.listID}/>
       </div>
     )

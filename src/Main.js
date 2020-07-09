@@ -1,12 +1,11 @@
 import React, { Component } from 'react'
 
 export default class Main extends Component {
-    
     constructor(props){
         super(props);
         this.state = {
             listID: props.listID,
-            // TODO check database to see if there are names
+            //TODO check database to see if there are names
             names: [],
             nameInput: '',
             errorMessage: ''
@@ -38,7 +37,7 @@ export default class Main extends Component {
     handlenameInputChange = (event) => {
         this.setState({ nameInput: event.target.value});
     }
-
+    
     render() {
         return (
             <div>
