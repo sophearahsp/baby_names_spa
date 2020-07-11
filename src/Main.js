@@ -29,6 +29,7 @@ export default class Main extends Component {
         this.handleSubmit = this.handleSubmit.bind(this);
         this.handleNameInputChange = this.handleNameInputChange.bind(this);
 
+        this.getNames();
     }
 
     handleSubmit = (event) => {
@@ -81,7 +82,11 @@ export default class Main extends Component {
     async getNames(){
         const response = await fetch(baseAPI+"url_identifications/"+this.props.dbID+"/name_ideas", initGet);
         const data = await response.json();
-        this.setState({nameObjects: data})
+        
+        if (data.length !== 0){
+            this.setState({nameObjects: data})
+        }
+        
         return data
     }
 

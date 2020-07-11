@@ -64,10 +64,18 @@ export default class App extends Component {
   }
 
   render() {
-    return (
-      <div>
-        <Main listID = {this.state.listID} dbID = {this.state.dbID}></Main>
-      </div>
-    )
+    if (!((this.state.dbID === undefined)||(this.state.dbID === -1))){
+      return (
+        <div>
+          <Main listID = {this.state.listID} dbID = {this.state.dbID}></Main>
+        </div>
+      )
+    }else{
+      return (
+        <div>
+          waiting for data
+        </div>
+      )
+    }
   }
 }
