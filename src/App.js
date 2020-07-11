@@ -1,53 +1,72 @@
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 import Main from "./Main"
 
+// API constants
+const baseAPI = 'http://localhost:3001/api/v1/';
+
+const initGet = {
+  method: 'GET',
+  accept: 'application/json',
+  cache: 'default',
+  headers: {}
+};
+
+const href = window.location.href;
+const protocol = window.location.protocol;
+const host = window.location.host;
+
 export default class App extends Component {
-  constructor(props){
+  constructor(props) {
     super(props);
     this.state = {
       listID: "",
-      names: [],
-      dbId: 0
+      dbID: -1
     }
-    const href = window.location.href;
-    const protocol = window.location.protocol;
-    const host = window.location.host;
 
+    // check if user came in with link
     if ((href.startsWith(protocol + "//" + host + "/?list_id=")) && // if has something as id
       (href.split('=')[1].match(/^[a-zA-Z0-9]{12}$/g)) && // if id is alphanumeric and 12 characters
       (this.verifyUrlIdentification(href.split('=')[1])) // it is verified to be in the database
-    ){
-      this.state.listID = href.split('=')[1];
-    }else{
-      this.newUrlIdentification();
+    ) {
+      // set state of listID & dbID
+      this.state = {listID: href.split('=')[1]};
+      this.getDbID()
+        .then((dbID) => this.setState({dbID: dbID}));
+    } else { // else new ID
+      this.newUrlIdentification()
+        .then(urlID => {this.setState({
+          listID: urlID.identification,
+          dbID: urlID.id})})
+        //TODO: change to promise resolve
+        .then(x => window.history.pushState({}, "", "/?list_id=" + this.state.listID));
     }
-
-    
   }
 
-  async verifyUrlIdentification(toVerify){
-    const API = 'http://localhost:3001/api/v1/url_identifications/';
-    const response = await fetch(API);
+  async verifyUrlIdentification (toVerify) {
+    const response = await fetch(baseAPI+"url_identifications/",initGet);
     const data = await response.json();
-
-    if (data.find(datum => datum.identification === toVerify)){
+    if (data.find(datum => datum.identification === toVerify)) {
       return true
-    }else{return false}
+    } else { return false }
   }
-
-  async newUrlIdentification(){
-    const API = 'http://localhost:3001/api/v1/url_identifications/new';
-    const response = await fetch(API);
+ 
+  async getDbID(){
+    const response = await fetch(baseAPI+"url_identifications/",initGet);
     const data = await response.json();
-
-    this.state = {listID: data.identification, dbId: data.id}
-    window.history.pushState({},"","/?list_id=" + this.state.listID);
+    const urlIdDatabase = data.find(datum => datum.identification === this.state.listID)
+    return urlIdDatabase.id
   }
 
-  render(){
-    return(
+  async newUrlIdentification() {
+    const response = await fetch(baseAPI + "url_identifications/new", initGet);
+    const data = await response.json();
+    return data
+  }
+
+  render() {
+    return (
       <div>
-        <Main listID={this.state.listID}/>
+        <Main listID = {this.state.listID} dbID = {this.state.dbID}></Main>
       </div>
     )
   }

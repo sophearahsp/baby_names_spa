@@ -1,43 +1,95 @@
 import React, { Component } from 'react'
 
+const baseAPI = 'http://localhost:3001/api/v1/';
+
+const initGet = {
+  method: 'GET',
+  accept: 'application/json',
+  cache: 'default',
+  headers: {}
+};
+
+const initPost = (data) => ({
+    method: 'POST',
+    accept: 'application/json',
+    cache: 'no-cache',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(data)
+  });
+
 export default class Main extends Component {
     constructor(props){
         super(props);
         this.state = {
-            listID: props.listID,
-            //TODO check database to see if there are names
-            names: [],
+            nameObjects: [],
             nameInput: '',
             errorMessage: ''
         }
+
         this.handleSubmit = this.handleSubmit.bind(this);
-        this.handlenameInputChange = this.handlenameInputChange.bind(this);
+        this.handleNameInputChange = this.handleNameInputChange.bind(this);
+
     }
 
     handleSubmit = (event) => {
         event.preventDefault();
         let newName = this.state.nameInput.trim() // removes whitespace
-
         if ((newName !== "") && //not blank
-            (this.state.names.find(name => {return name === newName;}) !== newName) // not already in the list
+           (this.state.nameObjects.find(nameObject => {return nameObject.name === newName;}) === undefined) // not already in the list
         ){
-            this.setState({nameInput: ""})
-            this.setState({errorMessage: ""});
-            this.setState(oldState => {
-                return {
-                    names: oldState.names.concat(newName)
-                };
+            this.nameInDbCheck(newName).then(inThere => {
+                if (inThere === false){
+                    this.addName(newName)
+                        .then(x => this.getNames())
+                }else{
+                    this.setState({errorMessage: "already in there"});
+                }
             })
-        }else{
-            this.setState({errorMessage: "theres an error"});
-            this.setState({nameInput: ""})
-        }
+            this.setState({errorMessage: ""});
+        }else{this.setState({errorMessage: "is blank"});}
+        this.setState({nameInput: ""})
+        
     }
     
-    handlenameInputChange = (event) => {
+    handleNameInputChange = (event) => {
         this.setState({ nameInput: event.target.value});
     }
-    
+
+    async nameInDbCheck(newName){
+        const nameObjects = await this.getNames()
+
+        const found = nameObjects.find(nameObject => nameObject.name === newName)
+        if (found === undefined){
+            return false
+        }else{
+            return true
+        }
+    }
+
+    async addName(newName){
+        const content = {
+            name_idea: {
+                name: newName,
+                url_identification_id: this.props.dbID
+            }
+        }
+        const response = await fetch(baseAPI+"url_identifications/"+this.props.dbID+"/name_ideas", initPost(content));
+        const data = await response.json();
+        return data
+    }
+
+    async getNames(){
+        const response = await fetch(baseAPI+"url_identifications/"+this.props.dbID+"/name_ideas", initGet);
+        const data = await response.json();
+        this.setState({nameObjects: data})
+        return data
+    }
+
+    refreshButton = (event) =>{
+        event.preventDefault();
+        this.getNames();
+    }
+
     render() {
         return (
             <div>
@@ -45,19 +97,23 @@ export default class Main extends Component {
                     <input
                         type = "text"
                         value = {this.state.nameInput}
-                        onChange = {this.handlenameInputChange}
+                        onChange = {this.handleNameInputChange}
                     />
                     
                     <button type="submit">Submit</button>
                     <label >{this.state.errorMessage}</label>
                 </form>
 
-                {// map names
-                this.state.names.map((name) => (
-                    <li key={name}>{name}</li>
+                {
+                this.state.nameObjects.map((nameObject) => (
+                    <li key={nameObject.name}>{nameObject.name}</li>
                 ))
                 }
                 
+                <form onSubmit={this.refreshButton}>
+                    <button type="submit">REFRESH</button>
+                </form>
+
             </div>
         )
     }
