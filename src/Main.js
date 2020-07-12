@@ -1,13 +1,14 @@
 import React, { Component } from 'react'
+import { Container, Form, Row, Col, Alert, ListGroup } from 'react-bootstrap';
 
 //const baseAPI = 'http://localhost:3001/api/v1/';
 const baseAPI = 'https://floating-headland-40405.herokuapp.com/api/v1/';
 
 const initGet = {
-  method: 'GET',
-  accept: 'application/json',
-  cache: 'default',
-  headers: {}
+    method: 'GET',
+    accept: 'application/json',
+    cache: 'default',
+    headers: {}
 };
 
 const initPost = (data) => ({
@@ -16,7 +17,15 @@ const initPost = (data) => ({
     cache: 'no-cache',
     headers: {'Content-Type': 'application/json'},
     body: JSON.stringify(data)
-  });
+});
+
+const initPatch = (data) => ({
+    method: 'PATCH',
+    accept: 'application/json',
+    cache: 'no-cache',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(data)
+});
 
 export default class Main extends Component {
     constructor(props){
@@ -29,7 +38,7 @@ export default class Main extends Component {
 
         this.handleSubmit = this.handleSubmit.bind(this);
         this.handleNameInputChange = this.handleNameInputChange.bind(this);
-
+        this.toggleStrikethrough = this.toggleStrikethrough.bind(this);
         this.getNames();
     }
 
@@ -47,15 +56,26 @@ export default class Main extends Component {
                     this.setState({errorMessage: "already in there"});
                 }
             })
-            this.setState({errorMessage: ""});
-        }else{this.setState({errorMessage: "is blank"});}
-        this.setState({nameInput: ""})
+            this.setState({errorMessage: " "});
+        }else if (this.state.nameObjects.find(nameObject => {return nameObject.name === newName;})){
+            this.setState({errorMessage: "already exists in list"});
+        }else{
+            this.setState({errorMessage: "is blank"});
+        }
+        this.setState({nameInput: " "})
         
     }
     
     handleNameInputChange = (event) => {
-        this.setState({ nameInput: event.target.value});
+        if (this.state.nameInput.length < event.target.value.length){
+            if ((event.target.value.match(/^([a-zA-Z]*[\s]?[a-zA-Z]*)$/g)) || this.state.nameInput === undefined){
+                this.setState({ nameInput: event.target.value});
+            }
+        }else{
+            this.setState({ nameInput: event.target.value});
+        }
     }
+    
 
     async nameInDbCheck(newName){
         const nameObjects = await this.getNames()
@@ -72,7 +92,8 @@ export default class Main extends Component {
         const content = {
             name_idea: {
                 name: newName,
-                url_identification_id: this.props.dbID
+                url_identification_id: this.props.dbID,
+                strikethrough: false
             }
         }
         const response = await fetch(baseAPI+"url_identifications/"+this.props.dbID+"/name_ideas", initPost(content));
@@ -91,35 +112,58 @@ export default class Main extends Component {
         return data
     }
 
-    refreshButton = (event) =>{
-        event.preventDefault();
-        this.getNames();
+    async toggleStrikethrough(nameObject) {
+        const content = {
+            name_idea: {
+                strikethrough: !nameObject.strikethrough
+            }
+        }
+        const response = await fetch(baseAPI+"url_identifications/"+this.props.dbID+"/name_ideas/"+nameObject.id, initPatch(content));
+        const data = await response.json();
+        return data
+    }
+
+    async clickListItem(nameObject,e){
+        this.toggleStrikethrough(nameObject)
+            .then(this.getNames())
     }
 
     render() {
         return (
             <div>
-                <form onSubmit={this.handleSubmit}>
-                    <input
-                        type = "text"
-                        value = {this.state.nameInput}
-                        onChange = {this.handleNameInputChange}
-                    />
-                    
-                    <button type="submit">Submit</button>
-                    <label >{this.state.errorMessage}</label>
-                </form>
-
-                {
-                this.state.nameObjects.map((nameObject) => (
-                    <li key={nameObject.name}>{nameObject.name}</li>
-                ))
-                }
-                
-                <form onSubmit={this.refreshButton}>
-                    <button type="submit">REFRESH</button>
-                </form>
-
+                <Container>
+                    <br/> <br/>
+                    <Row>
+                        <Col/>
+                        <Col lg={6}>
+                            <small className="text-danger"> {this.state.errorMessage}</small>
+                            
+                            <Form onSubmit={this.handleSubmit}>
+                                <Form.Group>
+                                    <Form.Control value = {this.state.nameInput} onChange = {this.handleNameInputChange} size="lg" type="text" placeholder="add new name" />
+                                </Form.Group>
+                            </Form>
+                            
+                            <ListGroup>
+                                <React.Fragment>
+                                    {this.state.nameObjects.map((nameObject) => (
+                                        
+                                        <ListGroup.Item action
+                                            style={{textDecorationLine: (nameObject.strikethrough ? 'line-through' : 'none')}}
+                                            key={nameObject.name}
+                                            onClick={(e) => this.clickListItem(nameObject,e)}
+                                        >
+                                            {nameObject.name}
+                                        </ListGroup.Item>
+                                    ))}
+                                </React.Fragment>
+                            </ListGroup>
+                        </Col>
+                        <Col>
+                        
+                        </Col>
+                    </Row>
+                </Container>
             </div>
         )
     }
