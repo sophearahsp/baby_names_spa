@@ -56,9 +56,13 @@ export default class Main extends Component {
                     this.setState({errorMessage: "already in there"});
                 }
             })
-            this.setState({errorMessage: ""});
-        }else{this.setState({errorMessage: "is blank"});}
-        this.setState({nameInput: ""})
+            this.setState({errorMessage: " "});
+        }else if (this.state.nameObjects.find(nameObject => {return nameObject.name === newName;})){
+            this.setState({errorMessage: "already exists in list"});
+        }else{
+            this.setState({errorMessage: "is blank"});
+        }
+        this.setState({nameInput: " "})
         
     }
     
@@ -132,15 +136,15 @@ export default class Main extends Component {
                     <Row>
                         <Col/>
                         <Col lg={6}>
+                            <small className="text-danger"> {this.state.errorMessage}</small>
+                            
                             <Form onSubmit={this.handleSubmit}>
                                 <Form.Group>
                                     <Form.Control value = {this.state.nameInput} onChange = {this.handleNameInputChange} size="lg" type="text" placeholder="add new name" />
                                 </Form.Group>
                             </Form>
+                            
                             <ListGroup>
-                                
-
-
                                 <React.Fragment>
                                     {this.state.nameObjects.map((nameObject) => (
                                         
@@ -153,10 +157,10 @@ export default class Main extends Component {
                                         </ListGroup.Item>
                                     ))}
                                 </React.Fragment>
-
                             </ListGroup>
                         </Col>
                         <Col>
+                        
                         </Col>
                     </Row>
                 </Container>
