@@ -1,5 +1,7 @@
 import React, { Component } from 'react'
 
+import { Container, Form, Row, Col, Alert, ListGroup } from 'react-bootstrap';
+
 const baseAPI = 'http://localhost:3001/api/v1/';
 
 const initGet = {
@@ -97,35 +99,40 @@ export default class Main extends Component {
         return data
     }
 
-    refreshButton = (event) =>{
-        event.preventDefault();
-        this.getNames();
-    }
+    alertClicked() {
+        alert('You clicked a button');
+    }      
 
     render() {
         return (
             <div>
-                <form onSubmit={this.handleSubmit}>
-                    <input
-                        type = "text"
-                        value = {this.state.nameInput}
-                        onChange = {this.handleNameInputChange}
-                    />
-                    
-                    <button type="submit">Submit</button>
-                    <label >{this.state.errorMessage}</label>
-                </form>
+                <Container>
+                    <br/> <br/>
+                    <Row>
+                        <Col/>
+                        <Col lg={6}>
+                            <Form onSubmit={this.handleSubmit}>
+                                <Form.Group>
+                                    <Form.Control value = {this.state.nameInput} onChange = {this.handleNameInputChange} size="lg" type="text" placeholder="add new name" />
+                                </Form.Group>
+                            </Form>
+                            <ListGroup>
+                                <ListGroup.Item action onClick={this.alertClicked}>
+                                    one
+                                </ListGroup.Item>
 
-                {
-                this.state.nameObjects.map((nameObject) => (
-                    <li key={nameObject.name}>{nameObject.name}</li>
-                ))
-                }
-                
-                <form onSubmit={this.refreshButton}>
-                    <button type="submit">REFRESH</button>
-                </form>
+                                {
+                                this.state.nameObjects.map((nameObject) => (
+                                    <ListGroup.Item action onClick={this.alertClicked} key={nameObject.name}>{nameObject.name}</ListGroup.Item>
+                                ))
+                                }
 
+                            </ListGroup>
+                        </Col>
+                        <Col>
+                        </Col>
+                    </Row>
+                </Container>
             </div>
         )
     }
