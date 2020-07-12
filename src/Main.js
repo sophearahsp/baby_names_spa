@@ -5,10 +5,10 @@ import { Container, Form, Row, Col, Alert, ListGroup } from 'react-bootstrap';
 const baseAPI = 'http://localhost:3001/api/v1/';
 
 const initGet = {
-  method: 'GET',
-  accept: 'application/json',
-  cache: 'default',
-  headers: {}
+    method: 'GET',
+    accept: 'application/json',
+    cache: 'default',
+    headers: {}
 };
 
 const initPost = (data) => ({
@@ -17,7 +17,15 @@ const initPost = (data) => ({
     cache: 'no-cache',
     headers: {'Content-Type': 'application/json'},
     body: JSON.stringify(data)
-  });
+});
+
+const initPatch = (data) => ({
+    method: 'PATCH',
+    accept: 'application/json',
+    cache: 'no-cache',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(data)
+});
 
 export default class Main extends Component {
     constructor(props){
@@ -30,7 +38,7 @@ export default class Main extends Component {
 
         this.handleSubmit = this.handleSubmit.bind(this);
         this.handleNameInputChange = this.handleNameInputChange.bind(this);
-
+        this.toggleStrikethrough = this.toggleStrikethrough.bind(this);
         this.getNames();
     }
 
@@ -80,7 +88,8 @@ export default class Main extends Component {
         const content = {
             name_idea: {
                 name: newName,
-                url_identification_id: this.props.dbID
+                url_identification_id: this.props.dbID,
+                strikethrough: false
             }
         }
         const response = await fetch(baseAPI+"url_identifications/"+this.props.dbID+"/name_ideas", initPost(content));
@@ -99,9 +108,21 @@ export default class Main extends Component {
         return data
     }
 
-    alertClicked() {
-        alert('You clicked a button');
-    }      
+    async toggleStrikethrough(nameObject) {
+        const content = {
+            name_idea: {
+                strikethrough: !nameObject.strikethrough
+            }
+        }
+        const response = await fetch(baseAPI+"url_identifications/"+this.props.dbID+"/name_ideas/"+nameObject.id, initPatch(content));
+        const data = await response.json();
+        return data
+    }
+
+    async clickListItem(nameObject,e){
+        this.toggleStrikethrough(nameObject)
+            .then(this.getNames())
+    }
 
     render() {
         return (
@@ -117,15 +138,21 @@ export default class Main extends Component {
                                 </Form.Group>
                             </Form>
                             <ListGroup>
-                                <ListGroup.Item action onClick={this.alertClicked}>
-                                    one
-                                </ListGroup.Item>
+                                
 
-                                {
-                                this.state.nameObjects.map((nameObject) => (
-                                    <ListGroup.Item action onClick={this.alertClicked} key={nameObject.name}>{nameObject.name}</ListGroup.Item>
-                                ))
-                                }
+
+                                <React.Fragment>
+                                    {this.state.nameObjects.map((nameObject) => (
+                                        
+                                        <ListGroup.Item action
+                                            style={{textDecorationLine: (nameObject.strikethrough ? 'line-through' : 'none')}}
+                                            key={nameObject.name}
+                                            onClick={(e) => this.clickListItem(nameObject,e)}
+                                        >
+                                            {nameObject.name}
+                                        </ListGroup.Item>
+                                    ))}
+                                </React.Fragment>
 
                             </ListGroup>
                         </Col>
