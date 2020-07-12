@@ -53,8 +53,15 @@ export default class Main extends Component {
     }
     
     handleNameInputChange = (event) => {
-        this.setState({ nameInput: event.target.value});
+        if (this.state.nameInput.length < event.target.value.length){
+            if ((event.target.value.match(/^([a-zA-Z]*[\s]?[a-zA-Z]*)$/g)) || this.state.nameInput === undefined){
+                this.setState({ nameInput: event.target.value});
+            }
+        }else{
+            this.setState({ nameInput: event.target.value});
+        }
     }
+    
 
     async nameInDbCheck(newName){
         const nameObjects = await this.getNames()
