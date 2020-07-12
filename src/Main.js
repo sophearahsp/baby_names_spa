@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Container, Form, Row, Col, Alert, ListGroup } from 'react-bootstrap';
+import { Container, Form, Row, Col, ListGroup } from 'react-bootstrap';
 
 //const baseAPI = 'http://localhost:3001/api/v1/';
 const baseAPI = 'https://floating-headland-40405.herokuapp.com/api/v1/';
