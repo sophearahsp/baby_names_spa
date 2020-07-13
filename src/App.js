@@ -1,16 +1,10 @@
 import React, { Component } from 'react';
+import { initGet } from './InitAPI';
 import Main from "./Main"
 
 // API constants
 const baseAPI = 'http://localhost:3001/api/v1/';
 //const baseAPI = 'https://floating-headland-40405.herokuapp.com/api/v1/';
-
-const initGet = {
-  method: 'GET',
-  accept: 'application/json',
-  cache: 'default',
-  headers: {}
-};
 
 const href = window.location.href;
 const protocol = window.location.protocol;
@@ -24,23 +18,24 @@ export default class App extends Component {
       dbID: -1
     }
 
+    //const checkConditions
     // check if user came in with link
-    if ((href.startsWith(protocol + "//" + host + "/?list_id=")) && // if has something as id
-      (href.split('=')[1].match(/^[a-zA-Z0-9]{12}$/g)) && // if id is alphanumeric and 12 characters
+    if (
+      (href.startsWith(protocol + "//" + host + "/?list_id=")) && // if has something as id
+      (href.split('=')[1].match(/^[a-zA-Z0-9]{12}$/g)) && // if id is alphanumeric and has 12 characters
       (this.verifyUrlIdentification(href.split('=')[1])) // it is verified to be in the database
     ) {
-      // set state of listID & dbID
       this.state = {listID: href.split('=')[1]};
       
       this.getDbID()
         .then(db => {
-          if (db === undefined){
+          if (db === undefined){// if id is not in database, create new one
             this.newUrlIdentification()
               .then(urlID => {this.setState({
                 listID: urlID.identification,
                 dbID: urlID.id})})
               .then(x => window.history.pushState({}, "", "/?list_id=" + this.state.listID));
-          }else{
+          }else{//otherwise, set state
             this.getDbID()
               .then((db) => this.setState({dbID: db.id}));
           }
@@ -54,6 +49,7 @@ export default class App extends Component {
     }
   }
 
+  //
   async verifyUrlIdentification (toVerify) {
     const response = await fetch(baseAPI+"url_identifications/",initGet);
     const data = await response.json();
@@ -62,6 +58,7 @@ export default class App extends Component {
     } else { return false }
   }
  
+  //
   async getDbID(){
     const response = await fetch(baseAPI+"url_identifications/",initGet);
     const data = await response.json();
@@ -72,6 +69,7 @@ export default class App extends Component {
     return urlIdDatabase
   }
 
+  //
   async newUrlIdentification() {
     const response = await fetch(baseAPI + "url_identifications/new", initGet);
     const data = await response.json();
@@ -79,6 +77,7 @@ export default class App extends Component {
   }
 
   render() {
+    
     if (!((this.state.dbID === undefined)||(this.state.dbID === -1))){
       return (
         <div>
@@ -88,7 +87,7 @@ export default class App extends Component {
     }else{
       return (
         <div>
-          waiting for data
+          Loading data...
         </div>
       )
     }

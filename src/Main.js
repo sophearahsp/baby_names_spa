@@ -1,35 +1,14 @@
 import React, { Component } from 'react'
+import { initGet, initPost, initPatch } from './InitAPI';
 import { Container, Form, Row, Col, ButtonGroup, Button, ListGroup } from 'react-bootstrap';
 
 const baseAPI = 'http://localhost:3001/api/v1/';
 //const baseAPI = 'https://floating-headland-40405.herokuapp.com/api/v1/';
 
-const initGet = {
-    method: 'GET',
-    accept: 'application/json',
-    cache: 'default',
-    headers: {}
-};
-
-const initPost = (data) => ({
-    method: 'POST',
-    accept: 'application/json',
-    cache: 'no-cache',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify(data)
-});
-
-const initPatch = (data) => ({
-    method: 'PATCH',
-    accept: 'application/json',
-    cache: 'no-cache',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify(data)
-});
-
 export default class Main extends Component {
     constructor(props){
         super(props);
+        //initial state
         this.state = {
             nameObjects: [],
             nameInput: '',
@@ -81,7 +60,7 @@ export default class Main extends Component {
         }
     }
     
-
+    // check name list
     async nameInDbCheck(newName){
         const nameObjects = await this.getNames()
 
