@@ -125,7 +125,7 @@ export default class Main extends Component {
 
     async clickListItem(nameObject,e){
         this.toggleStrikethrough(nameObject)
-            .then(this.getNames())
+            .then(x => this.getNames())
     }
 
     render() {
