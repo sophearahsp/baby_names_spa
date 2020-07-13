@@ -31,14 +31,25 @@ export default class App extends Component {
     ) {
       // set state of listID & dbID
       this.state = {listID: href.split('=')[1]};
+      
       this.getDbID()
-        .then((dbID) => this.setState({dbID: dbID}));
+        .then(db => {
+          if (db === undefined){
+            this.newUrlIdentification()
+              .then(urlID => {this.setState({
+                listID: urlID.identification,
+                dbID: urlID.id})})
+              .then(x => window.history.pushState({}, "", "/?list_id=" + this.state.listID));
+          }else{
+            this.getDbID()
+              .then((db) => this.setState({dbID: db.id}));
+          }
+        })
     } else { // else new ID
       this.newUrlIdentification()
         .then(urlID => {this.setState({
           listID: urlID.identification,
           dbID: urlID.id})})
-        //TODO: change to promise resolve
         .then(x => window.history.pushState({}, "", "/?list_id=" + this.state.listID));
     }
   }
@@ -55,7 +66,10 @@ export default class App extends Component {
     const response = await fetch(baseAPI+"url_identifications/",initGet);
     const data = await response.json();
     const urlIdDatabase = data.find(datum => datum.identification === this.state.listID)
-    return urlIdDatabase.id
+    if (urlIdDatabase === undefined){
+      return undefined
+    }
+    return urlIdDatabase
   }
 
   async newUrlIdentification() {
