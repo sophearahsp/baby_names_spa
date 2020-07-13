@@ -151,51 +151,66 @@ export default class Main extends Component {
             nameObjects: this.state.nameObjects.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
         })
     }
-
     render() {
-        return (
-            <div>
-                <Container>
-                    <br/> <br/>
-                    <Row>
-                        <Col/>
+        return (            
+            <div >
+                <Container fluid>
+                    <Row >
+                        <Col lg={3}/>
                         <Col lg={6}>
-                            <small className="text-danger"> {this.state.errorMessage}</small>
-                            
+                            <br/>
+
+                            <small className="text-danger"> {this.state.errorMessage}</small>  
+                            <br/>    
                             <Form onSubmit={this.handleSubmit}>
                                 <Form.Group>
-                                    <Form.Control value = {this.state.nameInput} onChange = {this.handleNameInputChange} size="lg" type="text" placeholder="add new name" />
+                                    <Form.Control value={this.state.nameInput} onChange={this.handleNameInputChange} size="lg" type="text" placeholder="add new name" />
                                 </Form.Group>
                             </Form>
-                            
-                            <br/>
+
                             <ButtonGroup aria-label="Basic example">
                                 <Button variant="secondary" onClick={this.sortAlphabetical}>Alphabetical</Button>
                                 <Button variant="secondary" onClick={this.sortLength}>Length</Button>
                                 <Button variant="secondary" onClick={this.sortRecent}>Recents</Button>
-                            </ButtonGroup>
+                            </ButtonGroup>   
 
-                            <ListGroup>
+                            <ListGroup >
                                 <React.Fragment>
                                     {this.state.nameObjects.map((nameObject) => (
-                                        
+
                                         <ListGroup.Item action
-                                            style={{textDecorationLine: (nameObject.strikethrough ? 'line-through' : 'none')}}
+                                            style={{ textDecorationLine: (nameObject.strikethrough ? 'line-through' : 'none') }}
                                             key={nameObject.name}
-                                            onClick={(e) => this.clickListItem(nameObject,e)}
+                                            onClick={(e) => this.clickListItem(nameObject, e)}
                                         >
                                             {nameObject.name}
                                         </ListGroup.Item>
                                     ))}
                                 </React.Fragment>
                             </ListGroup>
+
                         </Col>
-                        <Col>
-                        
-                        </Col>
+                        <Col lg={3} />
                     </Row>
                 </Container>
             </div>
         )
     }
 }
+
+/*
+ <ListGroup >
+                                    <React.Fragment>
+                                        {this.state.nameObjects.map((nameObject) => (
+
+                                            <ListGroup.Item action
+                                                style={{ textDecorationLine: (nameObject.strikethrough ? 'line-through' : 'none') }}
+                                                key={nameObject.name}
+                                                onClick={(e) => this.clickListItem(nameObject, e)}
+                                            >
+                                                {nameObject.name}
+                                            </ListGroup.Item>
+                                        ))}
+                                    </React.Fragment>
+                                </ListGroup>
+*/
