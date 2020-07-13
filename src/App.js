@@ -38,7 +38,7 @@ export default class App extends Component {
   }
 
   //gets new id from db and sets state and change current url
-  setIdChangeUrl(){
+  setIdChangeUrl = () => {
     this.getNewUrlIdFromDb()
       .then(urlID => {this.setState({
         listID: urlID.identification,
@@ -47,7 +47,7 @@ export default class App extends Component {
   }
 
   //looks for urlidentification with given identification in database
-  async getThisIdFromDb(idFromUrl){
+  getThisIdFromDb = async (idFromUrl) => {
     const response = await fetch(baseAPI+"url_identifications/",initGet);
     const data = await response.json();
     //if id exists in database
@@ -59,7 +59,7 @@ export default class App extends Component {
   }
 
   //create new id in database and return urlidentification object
-  async getNewUrlIdFromDb() {
+  getNewUrlIdFromDb = async () => {
     const response = await fetch(baseAPI + "url_identifications/new", initGet);
     const data = await response.json();
     return data
@@ -68,16 +68,11 @@ export default class App extends Component {
   render() {
     //if dbid is defined
     if (!((this.state.dbID === undefined)||(this.state.dbID === -1))){
-      return (// render main
-        <div>
-          <Main listID = {this.state.listID} dbID = {this.state.dbID}></Main>
-        </div>
-      )
+      // render main
+      return (<div><Main listID = {this.state.listID} dbID = {this.state.dbID}></Main></div>)
     }else{
       return (//otherwise loading data
-        <div>
-          Loading data...
-        </div>
+        <div>Loading data...</div>
       )
     }
   }

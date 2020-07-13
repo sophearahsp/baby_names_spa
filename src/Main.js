@@ -26,53 +26,56 @@ export default class Main extends Component {
         this.getNames();
     }
 
+    // check if name is valid and submit new name
     handleSubmit = (event) => {
         event.preventDefault();
         let newName = this.state.nameInput.trim() // removes whitespace
-        if ((newName !== "") && //not blank
-           (this.state.nameObjects.find(nameObject => {return nameObject.name === newName;}) === undefined) // not already in the list
-        ){
+
+        const notBlank = newName !== "";
+        const notInLocalList = this.state.nameObjects.find(nameObject => { return nameObject.name === newName; }) === undefined;
+        const alreadyInLocal =  this.state.nameObjects.find(nameObject => { return nameObject.name === newName; })
+        
+        // if input is not blank and not in local list
+        if ((notBlank) && (notInLocalList)) {
+            // check in db to seeif name already exists
             this.nameInDbCheck(newName).then(inThere => {
-                if (inThere === false){
+                if (inThere === false) {
+                    //if doesnt exist add new name
+                    this.setState({ errorMessage: "" });
                     this.addName(newName)
                         .then(x => this.getNames())
-                }else{
-                    this.setState({errorMessage: "already in there"});
+                //otherwise already exists in list, refresh, display error message
+                } else {
+                    this.getNames().then(x => this.setState({ errorMessage: "already in there" }));
                 }
             })
-            this.setState({errorMessage: " "});
-        }else if (this.state.nameObjects.find(nameObject => {return nameObject.name === newName;})){
-            this.setState({errorMessage: "already exists in list"});
-        }else{
-            this.setState({errorMessage: "is blank"});
-        }
-        this.setState({nameInput: " "})
-        
+        // if input in local list, display error message
+        } else if (alreadyInLocal) {this.setState({ errorMessage: "already exists in list" });
+        // if blank, display error message
+        } else {this.setState({ errorMessage: "is blank" });}
+        this.setState({ nameInput: " " })
     }
     
+    // handle input change and limit user input
     handleNameInputChange = (event) => {
         if (this.state.nameInput.length < event.target.value.length){
-            if ((event.target.value.match(/^([a-zA-Z]*[\s]?[a-zA-Z]*)$/g)) || this.state.nameInput === undefined){
+            const checkCharAnd1SpaceMax = event.target.value.match(/^([a-zA-Z]*[\s]?[a-zA-Z]*)$/g);
+            const inputIsUndefined = this.state.nameInput === undefined;
+            if (checkCharAnd1SpaceMax || inputIsUndefined) {
                 this.setState({ nameInput: event.target.value});
             }
-        }else{
-            this.setState({ nameInput: event.target.value});
-        }
+        }else{this.setState({ nameInput: event.target.value});}
     }
     
-    // check name list
-    async nameInDbCheck(newName){
+    // check database to see if name is already in the list
+    nameInDbCheck = async (newName) => {
         const nameObjects = await this.getNames()
-
         const found = nameObjects.find(nameObject => nameObject.name === newName)
-        if (found === undefined){
-            return false
-        }else{
-            return true
-        }
+        return ((found === undefined) ? false : true)
     }
 
-    async addName(newName){
+    // add new name to database
+    addName = async (newName) => {
         const content = {
             name_idea: {
                 name: newName,
@@ -85,18 +88,20 @@ export default class Main extends Component {
         return data
     }
 
-    async getNames(){
-        const response = await fetch(baseAPI+"url_identifications/"+this.props.dbID+"/name_ideas", initGet);
+    // get names from database
+    getNames = async () => {
+        const response = await fetch(baseAPI + "url_identifications/" + this.props.dbID + "/name_ideas", initGet);
         const data = await response.json();
-        
-        if (data.length !== 0){
-            this.setState({nameObjects: data})
+
+        if (data.length !== 0) {
+            this.setState({ nameObjects: data })
         }
-        
+
         return data
     }
 
-    async toggleStrikethrough(nameObject) {
+    // go to database and toggle strikethrough
+    toggleStrikethrough = async (nameObject) => {
         const content = {
             name_idea: {
                 strikethrough: !nameObject.strikethrough
@@ -107,29 +112,27 @@ export default class Main extends Component {
         return data
     }
 
-    async clickListItem(nameObject,e){
-        console.log(nameObject)
+    // click list item
+    clickListItem = async (nameObject,e) => {
         this.toggleStrikethrough(nameObject)
             .then(x => this.getNames())
     }
 
-    sortAlphabetical(){
-        this.setState({
-            nameObjects: this.state.nameObjects.sort((a, b) => a.name.localeCompare(b.name))
-        })
+    // sort names alphabetically
+    sortAlphabetical = () => {
+        this.setState({nameObjects: this.state.nameObjects.sort((a, b) => a.name.localeCompare(b.name))})
     }
 
-    sortLength(){
-        this.setState({
-            nameObjects: this.state.nameObjects.sort((a, b) => b.name.length - a.name.length || a.name.localeCompare(b.name))
-        })
+    // sort names by length
+    sortLength = () => {
+        this.setState({nameObjects: this.state.nameObjects.sort((a, b) => b.name.length - a.name.length || a.name.localeCompare(b.name))})
     }
 
-    sortRecent(){
-        this.setState({
-            nameObjects: this.state.nameObjects.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
-        })
+    // sort names by most recently inputted
+    sortRecent = () => {
+        this.setState({nameObjects: this.state.nameObjects.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))})
     }
+
     render() {
         return (            
             <div >
@@ -176,20 +179,3 @@ export default class Main extends Component {
         )
     }
 }
-
-/*
- <ListGroup >
-                                    <React.Fragment>
-                                        {this.state.nameObjects.map((nameObject) => (
-
-                                            <ListGroup.Item action
-                                                style={{ textDecorationLine: (nameObject.strikethrough ? 'line-through' : 'none') }}
-                                                key={nameObject.name}
-                                                onClick={(e) => this.clickListItem(nameObject, e)}
-                                            >
-                                                {nameObject.name}
-                                            </ListGroup.Item>
-                                        ))}
-                                    </React.Fragment>
-                                </ListGroup>
-*/
