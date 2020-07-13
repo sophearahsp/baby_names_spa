@@ -32,14 +32,14 @@ export default class App extends Component {
             this.setState({
               listID: idObj.identification,
               dbID: idObj.id});
-          }else{setIdChangeUrl()}//otherwise create new id
+          }else{this.setIdChangeUrl()}//otherwise create new id
         })
-    } else{setIdChangeUrl()}//otherwise create new id
+    } else{this.setIdChangeUrl()}//otherwise create new id
   }
 
   //gets new id from db and sets state and change current url
   setIdChangeUrl(){
-    this.newUrlIdentificationFromDb()
+    this.getNewUrlIdFromDb()
       .then(urlID => {this.setState({
         listID: urlID.identification,
         dbID: urlID.id})})
