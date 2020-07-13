@@ -17,75 +17,64 @@ export default class App extends Component {
       listID: "",
       dbID: -1
     }
+    
+    // if has url has an id
+    const checkUrlHasID = href.startsWith(protocol + "//" + host + "/?list_id=")
+    // and if id is alphanumeric and has 12 characters
+    const checkAlphanum12Char = href.includes("=") ? href.split('=')[1].match(/^[a-zA-Z0-9]{12}$/g) : false;
 
-    //const checkConditions
-    // check if user came in with link
-    if (
-      (href.startsWith(protocol + "//" + host + "/?list_id=")) && // if has something as id
-      (href.split('=')[1].match(/^[a-zA-Z0-9]{12}$/g)) && // if id is alphanumeric and has 12 characters
-      (this.verifyUrlIdentification(href.split('=')[1])) // it is verified to be in the database
-    ) {
-      this.state = {listID: href.split('=')[1]};
-      
-      this.getDbID()
-        .then(db => {
-          if (db === undefined){// if id is not in database, create new one
-            this.newUrlIdentification()
-              .then(urlID => {this.setState({
-                listID: urlID.identification,
-                dbID: urlID.id})})
-              .then(x => window.history.pushState({}, "", "/?list_id=" + this.state.listID));
-          }else{//otherwise, set state
-            this.getDbID()
-              .then((db) => this.setState({dbID: db.id}));
-          }
+    // if url has id && its valid
+    if (checkUrlHasID && checkAlphanum12Char){
+      this.getThisIdFromDb(href.split('=')[1])
+        .then(idObj => {
+          //if exists, sets state
+          if (idObj){
+            this.setState({
+              listID: idObj.identification,
+              dbID: idObj.id});
+          }else{setIdChangeUrl()}//otherwise create new id
         })
-    } else { // else new ID
-      this.newUrlIdentification()
-        .then(urlID => {this.setState({
-          listID: urlID.identification,
-          dbID: urlID.id})})
-        .then(x => window.history.pushState({}, "", "/?list_id=" + this.state.listID));
-    }
+    } else{setIdChangeUrl()}//otherwise create new id
   }
 
-  //
-  async verifyUrlIdentification (toVerify) {
-    const response = await fetch(baseAPI+"url_identifications/",initGet);
-    const data = await response.json();
-    if (data.find(datum => datum.identification === toVerify)) {
-      return true
-    } else { return false }
-  }
- 
-  //
-  async getDbID(){
-    const response = await fetch(baseAPI+"url_identifications/",initGet);
-    const data = await response.json();
-    const urlIdDatabase = data.find(datum => datum.identification === this.state.listID)
-    if (urlIdDatabase === undefined){
-      return undefined
-    }
-    return urlIdDatabase
+  //gets new id from db and sets state and change current url
+  setIdChangeUrl(){
+    this.newUrlIdentificationFromDb()
+      .then(urlID => {this.setState({
+        listID: urlID.identification,
+        dbID: urlID.id})})
+      .then(x => window.history.pushState({}, "", "/?list_id=" + this.state.listID));
   }
 
-  //
-  async newUrlIdentification() {
+  //looks for urlidentification with given identification in database
+  async getThisIdFromDb(idFromUrl){
+    const response = await fetch(baseAPI+"url_identifications/",initGet);
+    const data = await response.json();
+    //if id exists in database
+    if (data.some(datum => datum.identification === idFromUrl)) {
+      let datum = data.find(datum => datum.identification === idFromUrl);
+      console.log(datum)
+      return datum//return urlidentification object
+    }else{return null}//otherwise return false
+  }
+
+  //create new id in database and return urlidentification object
+  async getNewUrlIdFromDb() {
     const response = await fetch(baseAPI + "url_identifications/new", initGet);
     const data = await response.json();
     return data
   }
 
   render() {
-    
+    //if dbid is defined
     if (!((this.state.dbID === undefined)||(this.state.dbID === -1))){
-      return (
+      return (// render main
         <div>
           <Main listID = {this.state.listID} dbID = {this.state.dbID}></Main>
         </div>
       )
     }else{
-      return (
+      return (//otherwise loading data
         <div>
           Loading data...
         </div>
