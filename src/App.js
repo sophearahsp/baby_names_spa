@@ -2,8 +2,8 @@ import React, { Component } from 'react';
 import Main from "./Main"
 
 // API constants
-//const baseAPI = 'http://localhost:3001/api/v1/';
-const baseAPI = 'https://floating-headland-40405.herokuapp.com/api/v1/';
+const baseAPI = 'http://localhost:3001/api/v1/';
+//const baseAPI = 'https://floating-headland-40405.herokuapp.com/api/v1/';
 
 const initGet = {
   method: 'GET',
