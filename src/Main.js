@@ -1,8 +1,8 @@
 import React, { Component } from 'react'
-import { Container, Form, Row, Col, ListGroup } from 'react-bootstrap';
+import { Container, Form, Row, Col, ButtonGroup, Button, ListGroup } from 'react-bootstrap';
 
-//const baseAPI = 'http://localhost:3001/api/v1/';
-const baseAPI = 'https://floating-headland-40405.herokuapp.com/api/v1/';
+const baseAPI = 'http://localhost:3001/api/v1/';
+//const baseAPI = 'https://floating-headland-40405.herokuapp.com/api/v1/';
 
 const initGet = {
     method: 'GET',
@@ -38,7 +38,12 @@ export default class Main extends Component {
 
         this.handleSubmit = this.handleSubmit.bind(this);
         this.handleNameInputChange = this.handleNameInputChange.bind(this);
+
         this.toggleStrikethrough = this.toggleStrikethrough.bind(this);
+        this.sortAlphabetical = this.sortAlphabetical.bind(this);
+        this.sortLength = this.sortLength.bind(this);
+        this.sortRecent = this.sortRecent.bind(this);
+
         this.getNames();
     }
 
@@ -124,8 +129,27 @@ export default class Main extends Component {
     }
 
     async clickListItem(nameObject,e){
+        console.log(nameObject)
         this.toggleStrikethrough(nameObject)
-            .then(this.getNames())
+            .then(x => this.getNames())
+    }
+
+    sortAlphabetical(){
+        this.setState({
+            nameObjects: this.state.nameObjects.sort((a, b) => a.name.localeCompare(b.name))
+        })
+    }
+
+    sortLength(){
+        this.setState({
+            nameObjects: this.state.nameObjects.sort((a, b) => b.name.length - a.name.length || a.name.localeCompare(b.name))
+        })
+    }
+
+    sortRecent(){
+        this.setState({
+            nameObjects: this.state.nameObjects.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+        })
     }
 
     render() {
@@ -144,6 +168,13 @@ export default class Main extends Component {
                                 </Form.Group>
                             </Form>
                             
+                            <br/>
+                            <ButtonGroup aria-label="Basic example">
+                                <Button variant="secondary" onClick={this.sortAlphabetical}>Alphabetical</Button>
+                                <Button variant="secondary" onClick={this.sortLength}>Length</Button>
+                                <Button variant="secondary" onClick={this.sortRecent}>Recents</Button>
+                            </ButtonGroup>
+
                             <ListGroup>
                                 <React.Fragment>
                                     {this.state.nameObjects.map((nameObject) => (
