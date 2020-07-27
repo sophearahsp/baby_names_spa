@@ -1,16 +1,17 @@
 import React, { Component } from 'react';
+import { initGet } from './InitAPI';
 import Main from "./Main"
 
 // API constants
 //const baseAPI = 'http://localhost:3001/api/v1/';
 const baseAPI = 'https://floating-headland-40405.herokuapp.com/api/v1/';
 
-const initGet = {
-  method: 'GET',
-  accept: 'application/json',
-  cache: 'default',
-  headers: {}
-};
+// const initGet = {
+//   method: 'GET',
+//   accept: 'application/json',
+//   cache: 'default',
+//   headers: {}
+// };
 
 const href = window.location.href;
 const protocol = window.location.protocol;
