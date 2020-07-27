@@ -66,7 +66,7 @@ export default class App extends Component {
   }
 
   render() {
-    console.log("new")
+    console.log("new on orginal url")
     if (!((this.state.dbID === undefined)||(this.state.dbID === -1))){
       return (
         <div>
